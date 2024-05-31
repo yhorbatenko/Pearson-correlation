@@ -1,0 +1,26 @@
+#! /bin/bash
+
+if [ $# -ne 1 ]; then echo "Usage: $0 <input>"; exit 0;  fi
+
+awk 'function CORR(a,b,sa,sb,NR){
+                                 avga=sa/NR;
+                                 avgb=sb/NR;
+                                 for(i=1;i<=NR;i++;)
+                                    {
+                                     a_sa[i] = a[i] - avga;
+                                     b_sb[i] = b[i] - avgb;
+                                 
+                                     c   = c   + a_sa[i]*b_sb[i];
+                                     sa2 = sa2 + a_sa[i]^2;
+                                     sb2 = sb2 + b_sb[i]^2;
+                                    }
+                                 r_ = c/(sqrt(sa2)*sqrt(sb2));
+                                 return r_ ;
+              };
+     {
+      a[NR]==$1; sa=sa+$1;
+      b[NR]==$2; sb=sb+$2;
+     }END{
+          pearson_r = CORR(a,b,sa,sb,NR); 
+          print ARGV[1]," r= ", pearson_r;
+         }' "$1"
